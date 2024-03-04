@@ -1,0 +1,23 @@
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle text-black" 
+    data-bs-toggle="dropdown" href="#" role="button" 
+    data-bs-auto-close="true" aria-expanded="false">{% if request.project %}{{request.project.title}}{% else %}项目{% endif %}</a>
+    <ul class="dropdown-menu">
+    {% if my %}
+        <li class="dropdown-item text-bg-primary"><i class="bi bi-clipboard-data-fill"></i> 我创建的项目</li>
+        {% for object in my %}
+            <li><a class="dropdown-item" href="{% url 'projects:dashboard' object.id %}">{{object.title}}</a></li>
+        {% endfor %}
+        <li><hr class="dropdown-divider"></li>
+    {% endif %}
+    {% if join %}
+        <li class="dropdown-item text-bg-info"><i class="bi bi-diagram-3-fill"></i> 我参与的项目</li>
+        {% for object in join %}
+            <li><a class="dropdown-item" href="{% url 'projects:dashboard' object.project_id %}">{{object.project.title}}</a></li>
+        {% endfor %}
+        <li><hr class="dropdown-divider"></li>
+    {% endif %}
+    <li><a class="dropdown-item text-bg-success" href="{% url 'projects:list' %}"><i class="bi bi-clipboard-data-fill"></i> 所有的项目</a></li>
+    </ul>
+</li>

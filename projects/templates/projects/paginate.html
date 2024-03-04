@@ -1,0 +1,33 @@
+<!-- 分页 -->
+<div class="row align-items-center">
+    <div class="col-auto">
+        <nav aria-label="Page navigation example page-list">
+            <ul class="pagination justify-content-start mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&{{request.urlencode}}">首页</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{page_obj.previous_page_number}}&{{request.urlencode}}">上一页</a>
+                    </li>
+                {% endif %}
+                
+                {% for page in all_list_tag %}
+                    <li class="page-item"><a class="page-link {% if page.class %}{{page.class}}{% endif %}" href="{{page.url}}&{{request.urlencode}}">{{page.num}}</a></li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{page_obj.next_page_number}}&{{request.urlencode}}">下一页</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{page_obj.paginator.num_pages}}&{{request.urlencode}}">最后一页</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    <div class="col-auto ms-auto">
+        <div>当前：第{{page_obj.number}}页 | 共：{{page_obj.paginator.num_pages}}页</div>
+    </div>
+</div>

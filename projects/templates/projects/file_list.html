@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    .err_message {
+        color: red;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="row">
+    <div class="col-12">
+        <div class="card border-dark-50 mb-3">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item"><a href="{% url 'projects:file_list' request.project.id %}" class="nav-link" style="color: #3288f6;"><i class="bi bi-folder-fill"></i> 文件管理</a></li>
+                                {% for li in nav_li_list %}
+                                    <li class="breadcrumb-item"><a href="{% url 'projects:file_list' request.project.id %}?folder_id={{li.id}}" style="color: #3288f6;">{{li.name}}</a></li>
+                                {% endfor %}
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="d-flex col-auto ms-auto">
+                        <div class="pe-2">
+                            <form method="post" class="d-flex" enctype="multipart/form-data" id="file_upload">
+                                {% csrf_token %}
+                                <input class="form-control me-2" type="file" id="formFile" name="file_path">
+                                <button type="button" class="btn btn-primary" style="width: 163px;" id="file_upload_btn">
+                                    <i class="bi bi-box-arrow-in-up"></i> 上传文件
+                                </button>
+                            </form>
+                        </div>
+
+                        <div>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="新建文件夹">
+                                <i class="bi bi-plus-square"></i> 新建文件夹
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                      <thead>
+                        <tr>
+                            <th class="col-2">
+                                名称
+                            </th>
+                            <th class="col-2">
+                                文件大小
+                            </th>
+                            <th class="col-2">
+                                更新者
+                            </th>
+                            <th class="col-2">
+                                更新时间
+                            </th>
+                            <th class="col-2">
+                                
+                            </th>
+                        </tr>
+                      </thead>
+                      <tbody class="table-group-divider">
+                            {% for object in object_list %}
+                                <tr>
+                                    {% if object.file_type == 2 %}
+                                        <td class="text-truncate">
+                                            <a href="{{ request.path_info }}?folder_id={{object.id}}" class="nav-link" style="color: #3288f6;"><i class="bi bi-folder-fill"></i> {{object.name}}</a>
+                                        </td>
+                                        <td>-</td>
+                                        <td>{{object.user}}</td>
+                                        <td>{{object.update_date}}</td>
+                                        <td>
+                                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-name="{{object.name}}" data-bs-fid="{{object.id}}" data-bs-whatever="修改文件夹"><i class="bi bi-pencil-square"></i></button>
+                                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal" data-bs-fid="{{object.id}}"><i class="bi bi-trash3-fill"></i></button>
+                                        </td>
+                                    {% else %}
+                                        <td class="text-truncate"><i class="bi bi-files"></i> {{object.name}}</td>
+                                        <td>{{object.size}}</td>
+                                        <td>{{object.user}}</td>
+                                        <td>{{object.update_date}}</td>
+                                        <td>
+                                            <a class="btn btn-primary btn-sm" href="{{object.file_path.url}}" target="_blank"><i class="bi bi-cloud-arrow-down-fill"></i></a>
+                                            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#alertModal" data-bs-fid="{{object.id}}"><i class="bi bi-trash3-fill"></i></button>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CreateModal -->
+<div class="modal fade modal-dialog-scrollable" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel"></h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <form id="create">
+                            {% csrf_token %}
+                            <input type="text" id="fid" name="fid" value="" style="display: none;">
+                            {{ form.non_field_errors }}
+                            {% for field in form %}
+                                <div class="mb-3">
+                                    <label for="{{field.id_for_label}}" class="form-label">{{field.label}}</label>
+                                    {{field}}
+                                    <span id="{{field.id_for_label}}" class="err_message"></span>
+                                </div>
+                            {% endfor %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            <button type="button" class="btn btn-success" id="send">保存</button>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- alertModal -->
+<div class="modal fade modal-dialog-scrollable" id="alertModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="alert alert-danger mb-0" role="alert">
+            <div class="modal-header align-items-center p-0">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">删除文件夹</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12 p-0 my-3">
+                            <p>删除文件夹会把该文件夹下面的所有文件和文件夹删除！</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" id="btnalert">删除</button>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div id="liveAlertPlaceholder" class="fixed-top row justify-content-center"></div>
+
+
+<script>
+
+    let FILE_DELETE_URL = '{% url "projects:file_delete" request.project.id %}'
+    let UPLOAD_URL = "{% url 'projects:file_upload' request.project.id %}{% if folder_id %}?folder_id={{folder_id}}{% endif %}"
+
+    $( document ).ready(function() {
+
+        initAddmodal();
+        bindModalSubmit();
+        bindModalDelete();
+        bindFileUpload();
+        cleanerror();
+
+    });
+
+    function initAddmodal(){
+        const exampleModal = document.getElementById('exampleModal')
+        exampleModal.addEventListener('show.bs.modal', event => {
+            // Button that triggered the modal
+            const button = event.relatedTarget
+            // Extract info from data-bs-* attributes
+            const recipient = button.getAttribute('data-bs-whatever')
+            const name = button.getAttribute('data-bs-name')
+            const fid = button.getAttribute('data-bs-fid')
+            // If necessary, you could initiate an AJAX request here
+            // and then do the updating in a callback.
+            //
+            // Update the modal's content.
+            const modalTitle = exampleModal.querySelector('.modal-title')
+            modalTitle.textContent = recipient
+
+            if (fid) {
+                // 编辑文件夹
+                $('#id_name').val(name);
+                $('#fid').val(fid);
+            } else {
+                // 新建文件夹
+                $('#create')[0].reset();
+                exampleModal.querySelector('.err_message').textContent = ''
+            };
+        });
+
+        const alertModal = document.getElementById('alertModal')
+        alertModal.addEventListener('show.bs.modal', event => {
+            // Button that triggered the modal
+            const button = event.relatedTarget
+            // Extract info from data-bs-* attributes
+            const fid = button.getAttribute('data-bs-fid')
+            $('#btnalert').attr('fid', fid);
+        });
+    };
+
+    function bindModalSubmit() {
+        // 创建目录
+        $( "#send" ).on( "click", function() {
+
+            cleanerror();
+
+            $.ajax({
+                url: window.location.href,
+                data: $(' #create ').serialize(),
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                dataType: 'JSON',
+            })
+            .done((data) => {
+                console.log( data );
+                if (data.status) {
+                    window.location.href = window.location.href
+                } else {
+                    let error = JSON.parse(data.message)
+                    for ( let key in error) {
+                        console.log( key );
+                        let sp = $('span[id=id_' + key + ']');
+                        sp.text(error[key][0]['message']);
+                    }
+                }
+            })
+            .fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+            // .always(function( xhr, status ) {
+            //     alert( "The request is complete!" );
+            // });
+        });
+    };
+
+    function bindModalDelete() {
+        // 删除目录和文件
+        $( "#btnalert" ).on( "click", function() {
+
+            $.ajax({
+                url: FILE_DELETE_URL,
+                data: {'fid': $(this).attr('fid')},
+                type: "GET",
+                dataType: 'JSON',
+            })
+            .done((data) => {
+                console.log( data );
+                if (data.status) {
+                    window.location.href = window.location.href
+                } else {
+                    console.log( data );
+                }
+            })
+            .fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+            // .always(function( xhr, status ) {
+            //     alert( "The request is complete!" );
+            // });
+        });
+    };
+
+    function bindFileUpload() {
+        // 上传文件
+        $( "#file_upload_btn" ).on( "click", function() {
+
+            let formData = new FormData($(' #file_upload ')[0])
+
+            $.ajax({
+                url: UPLOAD_URL,
+                data: formData,
+                type: "POST",
+                cache: false,
+                processData: false,
+                contentType: false,
+                dataType: 'JSON',
+            })
+            .done((data) => {
+                console.log( data );
+                if (data.status) {
+                    window.location.href = window.location.href
+                } else {
+                    console.log( data );
+                    // 触发警告框
+                    const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
+                    
+                    let wrapper = $('#file_upload_err')[0]
+
+                    if (!wrapper) {
+                        const alert = (message, type) => {
+                            const wrapper = document.createElement('div')
+
+                            $(wrapper).attr('class', 'col-6')
+                            $(wrapper).attr('id', 'file_upload_err')
+
+                            wrapper.innerHTML = [
+                                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                                `   <div>${message}</div>`,
+                                '   <button type="button" class="btn-close" data-bs-dismiss="alert" data-bs-target="#file_upload_err" aria-label="Close"></button>',
+                                '</div>'
+                            ].join('')
+
+                            alertPlaceholder.append(wrapper)
+                        };
+                        alert(data.message, 'warning');
+                    };
+                };
+            })
+            .fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+
+        });
+    };
+        
+    function cleanerror() {
+        $('.err_message').text('');
+    };
+
+</script>
+
+{% endblock %}

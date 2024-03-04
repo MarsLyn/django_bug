@@ -1,0 +1,33 @@
+{% extends 'projects/setting.html' %}
+
+{% block css %}
+<style>
+    .err_message {
+        color: red;
+    }
+    .delete {
+        position: relative;
+        left: 242px;
+    }
+</style>
+{% endblock %}
+
+{% block setting %}
+<form action="{% url 'projects:delete' request.project.id %}" method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+        <div class="mb-3 row justify-content-center">
+            <label for="{{field.id_for_label}}" class="col-auto col-form-label">{{field.label}}: </label>
+            <div class="col-6">
+                {{field}}
+                <span class="err_message"><strong>{{field.errors.0}}</strong></span>
+            </div>
+        </div>
+    {% endfor %}
+
+        <div class="row">
+            <button type="submit" class="btn btn-danger col-auto delete">删除</button>
+        </div>
+</form>
+{% endblock %}

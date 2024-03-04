@@ -1,0 +1,87 @@
+{% load static %}
+{% load all_project_list %}
+
+
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <title>{% block title %}第一个BUG管理平台{% endblock %}</title>
+    <meta charset="utf-8" />
+    <link rel="icon" href="{% static 'images/icon.png' %}">
+    <link href="{% static 'bootstrap5/css/bootstrap.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-icons/font/bootstrap-icons.css' %}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        a {
+            outline: none;
+            text-decoration: none;
+        }
+        .err_message {
+            color: red;
+        }
+    </style>
+    {% block css %}{% endblock %}
+  </head>
+  <body>
+    <script src="{% static 'jquery/jquery.js' %}"></script>
+    <div class="container-fluid ps-0" id="container">
+        <div id="header">
+            <nav class="navbar bg-body-tertiary pt-0">
+                <div class="container-fluid" style="height: 5rem;">
+                    <a class="navbar-brand" href="#">
+                        <img src="{% static 'images/icon.png' %}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+                        最牛逼的BUG管理平台
+                    </a>
+                    {% if request.user.is_authenticated %}
+                        <ul class="nav nav-pills me-auto">
+                            {% all_project_list request %}
+                            {% if request.project %}
+                                {% menu_project_list request %}
+                            {% endif %}
+                        </ul>
+                    {% endif %}
+                    <div class="d-flex" role="search">
+                        <div class="row">
+                            {% if request.user.is_authenticated %}
+                                <div class="col-auto">
+                                    <a class="nav-link active" href="#"><i class="bi bi-person"></i> {{request.user}}</a>
+                                </div>
+                            {% else %}
+                                <div class="col-auto">
+                                    <a class="nav-link active" href="{% url 'user:register' %}">注册</a>
+                                </div>
+                                <div class="col-auto">
+                                    <a class="nav-link" href="{% url 'user:login_smscod' %}">登录</a>
+                                </div>
+                            {% endif %}
+                            {% if request.user.is_authenticated %}
+                                <div class="col-auto">
+                                    <form action="{% url 'user:logout' %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="submit" value="退出" class="nav-link">
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div id="main">
+            <div class="container-fluid">
+                {% block main %}内容{% endblock %}
+            </div>
+        </div>
+        <div id="footer">
+            <div class="container-fluid">
+
+            </div>
+        </div>
+    </div>
+    
+    <script src="{% static 'bootstrap5/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'bootstrap5/js/bootstrap.bundle.min.js' %}"></script>
+    {% block js %}
+    {% endblock %}
+  </body>
+</html>

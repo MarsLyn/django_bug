@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="col-12 px-5">
+    <div class="row mt-3">
+        <div class="col-12">
+            <h2>订单信息</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>订单</th>
+                        <th>单价</th>
+                        <th>数量</th>
+                        <th>原价</th>
+                        <th>原订单抵扣</th>
+                        <th>实际支付</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{strategy_object.title}}</td>
+                        <td>￥{{strategy_object.price}}</td>
+                        <td>{{number}}</td>
+                        <td>￥{{origin_price}}</td>
+                        <td>￥{{balance}}</td>
+                        <td>￥{{total_price}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if goods_object %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <div>原订单抵扣：￥{{balance}}</div>
+                    <div>
+                        原订单的时间为：{{goods_object.start_date}} ~ {{goods_object.end_date}}，且实际支付￥{{goods_object.amount}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-12">
+            <a href="{% url 'projects:pay' %}" class="btn btn-primary">立即支付</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

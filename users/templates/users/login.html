@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    .err_message {
+        color: red;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-4 py-5">
+        <h2 class="text-center mb-4">用户登录</h2>
+        <form action="{% url 'user:login_smscod' %}" method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                {% if field.name == 'smscode' %}
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <div class="form-floating">
+                                {{field}}
+                                <label for="{{field.id_for_label}}">{{field.label}}</label>
+                            </div> 
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <input class="btn btn-info text-white" type="button" value="发送短信" id="send">
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-3 ps-4">
+                        {% if field.errors %}
+                            <ul>
+                                {% for error in field.errors %}
+                                <li class="err_message">{{ error|escape }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="form-floating mb-3">
+                        {{field}}
+                        <label for="{{field.id_for_label}}">{{field.label}}</label>
+                        {% if field.errors %}
+                            <ol>
+                                {% for error in field.errors %}
+                                <li class="err_message">{{ error|escape }}</li>
+                                {% endfor %}
+                            </ol>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="err_message text-center mb-3" id="err_message"></div>
+
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                </div>
+                <div class="col-auto ms-auto">
+                    <a href="{% url 'user:login_img' %}">使用图片验证码登录</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+        let toekn
+        let email
+        let password
+        $( "#send" ).on( "click", function() {
+            token = $( "input[name='csrfmiddlewaretoken']" ).val();
+            email = $( "input[name='username']" ).val();
+            password = $( "input[name='password']" ).val();
+            if (email && password) {
+                console.log(token);
+                console.log(email);
+                console.log(password);
+                $.ajax({
+                    url: "{% url 'user:sendsms' %}",
+                    data: {
+                        csrfmiddlewaretoken: token,
+                        username: email,
+                        password: password,
+                    },
+                    type: "POST",
+                    contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                    dataType: 'JSON',
+                })
+                .done((data) => {
+                    console.log( data );
+                    if (data.status) {
+                        $('#err_message').text('');
+                        sendSmsRemaind()
+                    } else {
+                        $('#err_message').text(data.message[0]);
+                    }
+                })
+                .fail((xhr, status, errorThrown, data) => {
+                    console.log( "Error: " + errorThrown );
+                    console.log( "Status: " + status );
+                    console.dir( xhr );
+                });
+                // .always(function( xhr, status ) {
+                //     alert( "The request is complete!" );
+                // });
+            } else {
+                $('#err_message').text('未输入有效邮箱或密码');
+            }
+        });
+        function sendSmsRemaind() {
+            let $send = $('#send');
+            $send.prop('disabled', true);
+
+            let time = 60;
+            let remaind = setInterval(() => {
+                $send.val(time + '秒重新发送');
+                time = time - 1;
+                if (time < 1) {
+                    clearInterval(remaind)
+                    $send.val('发送短信').prop('disabled', false);
+                };
+            }, 1000);
+        };
+    });
+</script>
+{% endblock %}

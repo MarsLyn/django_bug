@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load all_project_list %}
+
+
+{% block main %}
+<div class="row justify-content-center mt-3">
+    <div class="col-3">
+        <div class="list-group">
+            <p class="list-group-item mb-0"><strong>个人中心</strong></p>
+            {% setting_nav request %}
+        </div>
+    </div>
+    <div class="col-7">
+        <div class="card border-dark-50">
+            <div class="card-header">
+                <i class="bi bi-person-vcard-fill"></i> 
+                我的资料
+            </div>
+            <div class="card-body">
+                {% block setting %}
+                    <p class="mb-0 text-center"><strong>系统设置</strong></p>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

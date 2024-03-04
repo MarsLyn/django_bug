@@ -1,0 +1,30 @@
+{% extends 'projects/wiki_list.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<form id="create" class="pt-3 pe-3" method="post" action="{% url 'projects:create' object.id %}">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+        {% if field.name == 'content' %}
+            <div class="mb-3">
+                <label for="{{field.id_for_label}}" class="form-label">{{field.label}}</label>
+
+                {{field}}
+
+                <span id="{{field.id_for_label}}" class="err_message">{{field.errors.0}}</span>
+            </div>
+        {% else %}
+            <div class="mb-3">
+                <label for="{{field.id_for_label}}" class="form-label">{% if field.name == 'parent' %}上级文章{% else %}{{field.label}}{% endif %}</label>
+                {{field}}
+                <span id="{{field.id_for_label}}" class="err_message">{{field.errors.0}}</span>
+            </div>
+        {% endif %}
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">提交</button>
+</form>
+{% endblock %}
+

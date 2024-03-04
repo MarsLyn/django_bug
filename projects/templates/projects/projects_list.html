@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    .err_message {
+        color: red;
+    }
+    .nav-av {
+        height: 10rem;
+    }
+    .card-img-top {
+        height: 8rem;
+    }
+    .panel-body {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .panel-body > .item {
+        border-radius: 6px;
+        width: 228px;
+        border: 1px solid #dddddd;
+        margin: 20px 10px;
+
+    }
+
+    .panel-body > .item:hover {
+        border: 1px solid #f0ad4e;
+    }
+
+    .title {
+        height: 104px;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        font-size: 15px;
+        text-decoration: none;
+    }
+
+    .panel-body > .item > .info {
+        padding: 10px 10px;
+
+        display: flex;
+        justify-content: space-between;
+
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+        color: #8c8c8c;
+
+    }
+
+    .panel-body > .item > .info a {
+        text-decoration: none;
+    }
+
+    .panel-body > .item > .info .fa-star {
+        font-size: 18px;
+    }
+
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="row my-3">
+    <div class="col-12">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <i class="bi bi-plus-square"></i> 创建项目
+        </button>
+    </div>
+</div>
+
+<div class="card border-success mb-3" >
+    <div class="card-header"><i class="bi bi-bookmark-star-fill"></i> 星标的项目</div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for object in object_list.star %}
+                <div class="col-3">
+                    <div class="card">
+                        <a href="{% url 'projects:dashboard' object.data.id %}" style="background-color: {{object.data.color}};" class="text-white nav-link title">{{object.data.title}}</a>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <a href="{% url 'projects:unstar' object.type object.data.id %}" class="text-success nav-link">
+                                        <i class="bi bi-bookmark-star-fill"></i>
+                                        <span>{{object.data.by_user}}</span>
+                                    </a>
+                                </div>
+                                <div class="col-auto ms-auto">
+                                    <i class="bi bi-person"></i>
+                                    <span>{{object.data.member_num}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="card border-primary mb-3" >
+    <div class="card-header"><i class="bi bi-clipboard-data-fill"></i> 我创建的项目</div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for object in object_list.my %}
+                <div class="col-3">
+                    <div class="card">
+                        <a href="{% url 'projects:dashboard' object.id %}" style="background-color: {{object.color}};" class="text-white nav-link title">{{object.title}}</a>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <a href="{% url 'projects:star' 'my' object.id %}" class="text-black-50 nav-link">
+                                        <i class="bi bi-bookmark-star"></i>
+                                        <span>{{object.by_user}}</span>
+                                    </a>
+                                </div>
+                                <div class="col-auto ms-auto">
+                                    <i class="bi bi-person"></i>
+                                    <span>{{object.member_num}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="card border-info mb-3" >
+    <div class="card-header"><i class="bi bi-diagram-3-fill"></i> 我参与的项目</div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for object in object_list.join %}
+                <div class="col-3">
+                    <div class="card">
+                        <a href="{% url 'projects:dashboard' object.id %}" style="background-color: {{object.color}};" class="text-white nav-link title">{{object.title}}</a>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <a href="{% url 'projects:star' 'join' object.id %}" class="text-black nav-link">
+                                        <i class="bi bi-bookmark-star"></i>
+                                        <span>{{object.by_user}}</span>
+                                    </a>
+                                </div>
+                                <div class="col-auto ms-auto">
+                                    <i class="bi bi-person"></i>
+                                    <span>{{object.member_num}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade modal-dialog-scrollable" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">新建</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <form id="create">
+                            {% csrf_token %}
+                            {{ form.non_field_errors }}
+                            {% for field in form %}
+                                {% if field.name == 'description' %}
+                                    <div class="mb-3">
+                                        {{field}}
+                                        <span id="{{field.id_for_label}}" class="err_message"></span>
+                                    </div>
+                                {% elif field.name == 'color' %}
+                                    <div class="mb-3">
+                                        <label for="{{field.id_for_label}}" class="form-label">{{field.label}}:</label>
+                                        <input name="{{field.name}}" type="color" class="form-control form-control-color" id="{{field.id_for_label}}" value="#563d7c">
+                                        <span id="{{field.id_for_label}}" class="err_message"></span>
+                                    </div>
+                                {% else %}
+                                    <div class="form-floating mb-3">
+                                        {{field}}
+                                        <label for="{{field.id_for_label}}" class="form-label">{{field.label}}</label>
+                                        <span id="{{field.id_for_label}}" class="err_message"></span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+        <button type="submit" class="btn btn-success" id="send">保存</button>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+<script>
+    $( document ).ready(function() {
+        $( "#send" ).on( "click", function() {
+            // sendSmsRemaind()
+            cleanerror()
+            $.ajax({
+                url: "{% url 'projects:create' %}",
+                data: $(' #create ').serialize(),
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                dataType: 'JSON',
+            })
+            .done((data) => {
+                console.log( data );
+                if (data.status) {
+                    window.location.href = "{% url 'projects:list' %}"
+                } else {
+                    let error = JSON.parse(data.message)
+                    for ( let key in error) {
+                        console.log( key );
+                        let sp = $('span[id=id_' + key + ']');
+                        sp.text(error[key][0]['message']);
+                    }
+                }
+            })
+            .fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+            // .always(function( xhr, status ) {
+            //     alert( "The request is complete!" );
+            // });
+        });
+        function sendSmsRemaind() {
+            let ids = '[id=id_' + 'color]';
+            let sp = $('span' + ids ).text('xxxx');
+            console.log(sp);
+        };
+        function cleanerror() {
+            $('.err_message').text('');
+        };
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<style>
+    .err_message {
+        color: red;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="row justify-content-center">
+    <div class="col-4 py-5">
+        <h2 class="text-center mb-4">用户登录</h2>
+        <form action="{% url 'user:login_img' %}" method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                {% if field.name == 'imgcode' %}
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <div class="form-floating">
+                                {{field}}
+                                <label for="{{field.id_for_label}}">{{field.label}}</label>
+                            </div> 
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <img src="" alt="图片验证码" id="imgcode">
+                        </div>
+                    </div>
+                    <div class="row align-items-center mb-3 ps-4">
+                        {% if field.errors %}
+                            <ul>
+                                {% for error in field.errors %}
+                                <li class="err_message">{{ error|escape }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="form-floating mb-3">
+                        {{field}}
+                        <label for="{{field.id_for_label}}">{{field.label}}</label>
+                        {% if field.errors %}
+                            <ol>
+                                {% for error in field.errors %}
+                                <li class="err_message">{{ error|escape }}</li>
+                                {% endfor %}
+                            </ol>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="err_message text-center mb-3" id="err_message"></div>
+
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">登录</button>
+                </div>
+                <div class="col-auto ms-auto">
+                    <a href="{% url 'user:login_smscod' %}">使用短信验证码登录</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    $( document ).ready(function() {
+        let get_img_code = function get_img_code() {
+            $.ajax({
+                url: "{% url 'user:imgcode' %}",
+                type: "GET",
+            })
+            .done((data) => {
+                $( "#imgcode" ).attr('src', 'data:image/png;base64,' + data)
+            })
+            .fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+        };
+
+        get_img_code();
+
+        $( "#imgcode" ).on( "click", function() {
+            get_img_code()
+        });
+    });
+</script>
+{% endblock %}

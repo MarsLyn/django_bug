@@ -1,0 +1,400 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load all_project_list %}
+{% load issues %}
+
+{% block css %}
+<link href="{% static 'bootstrap-datepicker/css/bootstrap-datepicker.min.css' %}" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css">
+
+<style>
+    .issues-list .number {
+        width: 100px;
+        text-align: right;
+    }
+    .issues-list .number a {
+        font-weight: 500;
+        padding: 0 10px;
+        color: #0b57d0;
+    }
+    .issues-list .issue .tags {
+        padding: 10px 0;
+    }
+    .issues-list .issue .tags span {
+        margin-right: 20px;
+        display: inline-block;
+        font-size: 12px;
+    }
+    .issues-list .issue .tags .type {
+        color: white;
+        padding: 1px 5px;
+        border-radius: 5px;
+    }
+    label {
+        text-align: right;
+    }
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="row mt-3">
+    <div class="col-7">
+        <div class="card border-dark-50 mb-3">
+            <div class="card-header">
+                <i class="bi bi-pencil-square"></i> 
+                更新问题
+            </div>
+            <div class="card-body border-bottom">
+                <form id="issues_update">
+                    <div class="mb-3 row">
+                        <label for="{{form.issues_type.id_for_label}}" class="col-2 col-form-label">{{form.issues_type.label}}: </label>
+                        <div class="col-10">
+                            {{form.issues_type}}
+                            <span id="{{form.issues_type.id_for_label}}" class="err_message">{{form.issues_type.errors.0}}</span>
+                        </div>
+                        
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="{{form.subject.id_for_label}}" class="col-2 col-form-label">{{form.subject.label}}: </label>
+                        <div class="col-10">
+                            {{form.subject}}
+                            <span id="{{form.subject.id_for_label}}" class="err_message">{{form.subject.errors.0}}</span>
+                        </div>
+                        
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="{{form.module.id_for_label}}" class="col-2 col-form-label">{{form.module.label}}: </label>
+                        <div class="col-10">
+                            {{form.module}}
+                            <span id="{{form.module.id_for_label}}" class="err_message">{{form.module.errors.0}}</span>
+                        </div>
+                        
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="{{form.desc.id_for_label}}" class="col-2 col-form-label">{{form.desc.label}}: </label>
+                        <div class="col-10">
+                            {{form.desc}}
+                            <span id="{{form.desc.id_for_label}}" class="err_message">{{form.desc.errors.0}}</span>
+                        </div>
+                        
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.status.id_for_label}}" class="col-4 col-form-label">{{form.status.label}}: </label>
+                                <div class="col-8">
+                                    {{form.status}}
+                                    <span id="{{form.status.id_for_label}}" class="err_message">{{form.status.errors.0}}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.priority.id_for_label}}" class="col-4 col-form-label">{{form.priority.label}}: </label>
+                                <div class="col-8">
+                                    {{form.priority}}
+                                    <span id="{{form.priority.id_for_label}}" class="err_message">{{form.priority.errors.0}}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.assign.id_for_label}}" class="col-4 col-form-label">{{form.assign.label}}: </label>
+                                <div class="col-8">
+                                    {{form.assign}}
+                                    <span id="{{form.assign.id_for_label}}" class="err_message">{{form.assign.errors.0}}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.attention.id_for_label}}" class="col-4 col-form-label">{{form.attention.label}}: </label>
+                                <div class="col-8">
+                                    {{form.attention}}
+                                    <span id="{{form.attention.id_for_label}}" class="err_message">{{form.attention.errors.0}}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.start_date.id_for_label}}" class="col-4 col-form-label">{{form.start_date.label}}: </label>
+                                <div class="col-8">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon1"><i class="bi bi-calendar3"></i></span>
+                                        {{form.start_date}}
+                                        <span id="{{form.start_date.id_for_label}}" class="err_message">{{form.start_date.errors.0}}</span>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.end_date.id_for_label}}" class="col-4 col-form-label">{{form.end_date.label}}: </label>
+                                <div class="col-8">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon1"><i class="bi bi-calendar3"></i></span>
+                                        {{form.end_date}}
+                                        <span id="{{form.end_date.id_for_label}}" class="err_message">{{form.end_date.errors.0}}</span>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.mode.id_for_label}}" class="col-4 col-form-label">{{form.mode.label}}: </label>
+                                <div class="col-8">
+                                    {{form.mode}}
+                                    <span id="{{form.mode.id_for_label}}" class="err_message">{{form.mode.errors.0}}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3 row">
+                                <label for="{{form.parent.id_for_label}}" class="col-4 col-form-label">{{form.parent.label}}: </label>
+                                <div class="col-8">
+                                    {{form.parent}}
+                                    <span id="{{form.parent.id_for_label}}" class="err_message">{{form.parent.errors.0}}</span>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            
+        </div>
+        
+    </div>
+    <div class="col-5">
+        <div class="card border-dark-50">
+            <div class="card-header">
+                <i class="bi bi-search"></i> 
+                操作记录
+            </div>
+            <div class="card-body">
+                <div class="mb-5 comment-list">
+                    {% for object in reply_object_list %}
+                        <div id="{{object.id}}" name="{{object.creator}}" {% if not object.parent %} parent=true {% else %} parent_id="{{object.parent.id}}" {% endif %}>
+                            <div class="mb-2 row">
+                                <div class="col-12">
+                                    {{object.creator}}{% if object.receiver %} @ {{object.receiver}}{% endif %}:
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <div class="col-12">
+                                    <div class="border p-2 bg-body-tertiary rounded">
+                                        {{object.content}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2 row">
+                                <div class="col-auto">
+                                    <i class="bi bi-megaphone"></i> 
+                                    {{object.get_reply_type_display}}
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-alarm"></i> 
+                                    {{object.create_datetiem}}
+                                </div>
+                                <div class="col-auto">
+                                    <a href="#contentText" id="reply"><i class="bi bi-chat-dots"></i> 回复</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div id="issues_reply">
+                    <div class="mb-3 row" id="contentText">
+                        <div class="col-12">
+                            <textarea class="form-control" rows="5" placeholder="请输入内容" name="content"></textarea>
+                            <span id="id_content" class="err_message">{{form.parent.errors.0}}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row align-items-center">
+                        <div class="col-auto">
+                            <button class="btn btn-primary" id="submitReply">回 复</button>
+                        </div>
+                        <div class="col-auto visually-hidden rounded" id="replyUser" style="background-color: #e9e9e9; color: #b6b6b6;">
+                            回复 <span>111</span>
+                            <i class="bi bi-trash"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'bootstrap-datepicker/js/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/i18n/defaults-zh_CN.min.js"></script>
+<script>
+
+    let REPLY_URL = "{% url 'projects:issues_reply' request.project.id object.id %}"
+    let ISSUES_UPDATE_URL = "{% url 'projects:issues_update' request.project.id object.id %}"
+
+    $( document ).ready(function() {
+
+        initDatePicker();
+        initSelectpicker();
+        initIssuesRecord();
+        bindsubmitReply();
+        cleanerror();
+        bindReply();
+        bindCancelReplyUser();
+        bindChangeIssues();
+    });
+
+    function initDatePicker() {
+        // 初始化日期选择器插件
+
+        $('#id_start_date, #id_end_date').datepicker({
+            format: 'yyyy-mm-dd',
+            startDate: '0',
+            language: 'zh-CN',
+            autoclose: true,
+        })
+
+    };
+
+    function initSelectpicker() {
+        // 初始化selectpicker插件
+        $('.selectpicker').selectpicker();
+    };
+
+    function initIssuesRecord() {
+        // 问题评论初始化
+        let reply_items = $('.comment-list').children();
+
+        for (let i = 0; i < reply_items.length; i++) {
+            let div_just = reply_items.eq(i).append($('<div>').attr('name', 'child'))
+            if (!reply_items.eq(i).attr('parent')){
+                // console.log($('#' + reply_items.eq(i).attr('parent_id')).children('div[name="child"]'))
+                let child = $('#' + reply_items.eq(i).attr('parent_id')).children('div[name="child"]')
+                child.append(reply_items.eq(i))
+            } else {
+                div_just.children('div[name="child"]').attr('class', 'ps-5').addClass('mb-4')
+            };
+        };
+    };
+
+    function bindReply() {
+        // 添加回复对象到输入框
+        $('.comment-list').on('click', '#reply', function() {
+            let item = $(this).parent().parent().parent();
+            let id = item.attr('id')
+            let username = item.attr('name')
+            $('#replyUser').removeClass('visually-hidden').attr('parent-id', id).children('span').text(username)
+            console.log(item);
+        });
+    };
+
+    function bindCancelReplyUser() {
+        // 取消输入框的回复对象
+        $('#replyUser').on('click', function(){
+            $('#replyUser').addClass('visually-hidden').removeAttr('parent-id').children('span').text('')
+        })
+    }
+
+    function bindsubmitReply() {
+        // 回复或者评论
+        $( "#submitReply" ).on( "click", function() {
+
+            cleanerror();
+
+            $.ajax({
+                url: REPLY_URL,
+                data: {'content': $('textarea[name="content"]').val(), 'parent': $('#replyUser').attr('parent-id'), 'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()},
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                dataType: 'JSON',
+            })
+            .done((data) => {
+                // console.log( data );
+                if (data.status) {
+                    window.location.reload();
+                    // console.log( data );
+                } else {
+                    let error = JSON.parse(data.message)
+                    for ( let key in error) {
+                        // console.log( key );
+                        let sp = $('span[id=id_' + key + ']');
+                        sp.text(error[key][0]['message']);
+                    }
+                }
+            })
+            .fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+            // .always(function( xhr, status ) {
+            //     alert( "The request is complete!" );
+            // });
+        });
+    };
+    
+    function bindChangeIssues() {
+        $('#issues_update').on('change', '.form-control,.form-select,.selectpicker', function() {
+
+            cleanerror();
+
+            let postDict = {name: $(this).attr('name'), value: $(this).val()}
+            console.log(postDict)
+
+            $.ajax({
+                url: ISSUES_UPDATE_URL,
+                data: JSON.stringify(postDict),
+                type: "POST",
+                contentType: "application/json; charset=UTF-8",
+                dataType: 'JSON',
+            })
+            .done((data) => {
+                console.log( data );
+                if (data.status) {
+                    window.location.reload();
+                } else {
+                    if ($(this).hasClass('selectpicker')) {
+                        $(this).parent().parent().find('span[class="err_message"]').text(data.message);
+                    } else {
+                        $(this).next('span').text(data.message);
+                    }
+                }
+            })
+            .fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+        })
+    }
+
+    function cleanerror() {
+        $('.err_message').text('');
+    };
+
+</script>
+{% endblock %}

@@ -1,0 +1,5 @@
+{% for object in all_list_tag %}
+    <a href="{{object.url}}" class="list-group-item list-group-item-action {% if object.class %}{{object.class}}{% endif %}" {% if object.aria_current %}aria-current="true"{% endif %}>
+        {{object.title}}
+    </a>
+{% endfor %}

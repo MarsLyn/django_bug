@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="col-12 px-5">
+    <div class="row mt-3">
+        <div class="col-12">
+            <h2>请支付</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>订单</th>
+                        <th>数量</th>
+                        <th>实际支付</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{oid}}</td>
+                        <td>{{number}}</td>
+                        <td>￥{{total_price}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <form action="{% url 'projects:pay_callback' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="oid" value="{{oid}}">
+                <button type="submit" class="btn btn-primary">已支付</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'daterangepicker/daterangepicker.css' %}">
+{% endblock %}
+
+{% block main %}
+<div class="row mt-3">
+    <div class="col-12" style="width: 400px;">
+        <div class="input-group mb-3">
+            <span class="input-group-text">日期范围</span>
+            <input type="text" class="form-control" id="daterang">
+          </div>
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <div class="card border-dark-50 mb-3">
+                <div class="card-header">
+                    <i class="bi bi-bar-chart-line-fill"></i> 
+                    人员工作进度
+                </div>
+                <div class="card-body">
+                    <div id="projectUser" style="width: 100%; min-height: 280px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card border-dark-50 mb-3">
+                <div class="card-header">
+                    <i class="bi bi-pie-chart-fill"></i> 
+                    优先级统计
+                </div>
+                <div class="card-body">
+                    <div id="priority" style="width: 100%; min-height: 280px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'daterangepicker/moment.min.js' %}"></script>
+    <script src="{% static 'daterangepicker/daterangepicker.js' %}"></script>
+    <script src="{% static 'Highcharts/highcharts.js' %}"></script>
+    <script>
+
+        let PRIORITY_URL = "{% url 'projects:priority' request.project.id %}"
+        let PROJECT_USER_URL = "{% url 'projects:statistics_user' request.project.id %}"
+
+        $(document).ready(function() {
+            initDaterangepocker();
+            initIssuesPriority(moment().format('YYYY-MM-DD'), moment().add(1, 'days').format('YYYY-MM-DD'));
+            initProjectUser(moment().format('YYYY-MM-DD'), moment().add(1, 'days').format('YYYY-MM-DD'));
+        });
+
+        function initDaterangepocker() {
+            // 初始化时间范围选择器
+            let options = {
+                maxDate: moment(),
+                alwaysShowCalendars: true,
+                showWeekNumbers: true,
+                ranges: {
+                    '今天': [moment(), moment()],
+                    '昨天': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '最近7天': [moment().subtract(6, 'days'), moment()],
+                    '最近30天': [moment().subtract(29, 'days'), moment()],
+                    '本月': [moment().startOf('month'), moment().endOf('month')],
+                },
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    separator: '至',
+                    applyLabel: '确定',
+                    cancelLabel: '取消',
+                    fromLabel: '开始',
+                    toLabel: '结束',
+                    customRangeLabel: '自定义',
+                    weekLabel: 'W',
+                    daysOfWeek: ['一', '二', '三', '四', '五', '六', '日'],
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    firstDay: 1
+                }
+            };
+
+            $('#daterang').daterangepicker(options, function(start, end, label) {
+                // 选择时间后自动触发
+                console.log(start.format('YYYY-MM-DD'), end.add(1, 'days').format('YYYY-MM-DD'));
+                start = start.format('YYYY-MM-DD');
+                end = end.add(1, 'days').format('YYYY-MM-DD');
+                initProjectUser(start, end);
+                initIssuesPriority(start, end);
+            });
+        };
+        
+        function initProjectUser(start, end) {
+            // 获取人员工作进度的数据
+
+            let config = {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: null,
+                },
+                credits: {
+                    enabled: false
+                },
+                xAxis: {
+                    categories: []
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: '问题数量'
+                    },
+                    stackLabels: {  // 堆叠数据标签
+                        enabled: true,
+                        style: {
+                            fontWeight: 'bold',
+                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                        }
+                    }
+                },
+                legend: {
+                    align: 'center',
+                    verticalAlign: 'top'
+                },
+                tooltip: {
+                    formatter: function() {
+                        return '<b>' + this.x + '</b><br/>' +
+                            this.series.name + ': ' + this.y + '<br/>' +
+                            '总量： ' + this.point.stackTotal;
+                    }
+                },
+                plotOptions: {
+                    column: {
+                        stacking: 'normal',
+                        dataLabels: {
+                            enabled: false
+                        }
+                    }
+                },
+                series: []
+            };
+
+            $.ajax({
+                url: PROJECT_USER_URL,
+                type: 'GET',
+                data: {start: start, end: end},
+                dataType: 'JSON'
+            }).done((data) => {
+                console.log(data)
+                config.xAxis.categories = data.data.categories
+                config.series = data.data.series
+                Highcharts.chart('projectUser', config);
+            }).fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+        };
+
+        function initIssuesPriority(start, end) {
+            // 获取优先级统计的数据
+            
+            let config = {
+                chart: {
+                    type: 'pie'
+                },
+                title: {
+                    text: null
+                },
+                credits: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.y}</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: false,
+                        },
+                        showInLegend: true
+                    }
+                },
+                accessibility: {
+                    enabled: false,
+                },
+                series: [
+                    {
+                        name: '优先级',
+                        colorByPoint: true,
+                        data: []
+                    }
+                ]
+            };
+            
+            $.ajax({
+                url: PRIORITY_URL,
+                type: 'GET',
+                data: {start: start, end: end},
+                dataType: 'JSON'
+            }).done((data) => {
+                console.log(data)
+                config.series[0].data = data.data
+                Highcharts.chart('priority', config);
+            }).fail((xhr, status, errorThrown, data) => {
+                console.log( "Error: " + errorThrown );
+                console.log( "Status: " + status );
+                console.dir( xhr );
+            });
+        };
+    </script>
+{% endblock %}
